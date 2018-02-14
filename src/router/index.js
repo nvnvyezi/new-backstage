@@ -20,7 +20,7 @@ export default new Router({
   mode: 'history',
   routes: [
     {
-      path: '/login',
+      path: '/',
       name: 'HelloWorld',
       component: HelloWorld,
       meta: { boolean: true }
@@ -31,12 +31,12 @@ export default new Router({
       component: admin,
       children: [
         {
-          path: '/',
+          path: '/info',
           name: 'home',
           component: home
         },
         {
-          path: '/info',
+          path: '/',
           component: info,
           name: 'info'
         },

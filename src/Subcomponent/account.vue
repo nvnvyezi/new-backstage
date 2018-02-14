@@ -5,7 +5,7 @@
         {{ utitle }}
       </h1>
     </div>
-    <div>
+    <div class="tab">
       <Table border :columns="columns7" :data="data6"></Table>
     </div>
     <div class="button">
@@ -16,88 +16,25 @@
         </el-button>
       </el-button-group>
     </div>
-    <div>
-      <el-form :model="ruleForm2" status-icon :rules="rules2" ref="ruleForm2" label-width="100px" class="demo-ruleForm">
-        <el-form-item label="密码" prop="pass">
-          <el-input type="password" v-model="ruleForm2.pass" auto-complete="off"></el-input>
-        </el-form-item>
-        <el-form-item label="确认密码" prop="checkPass">
-          <el-input type="password" v-model="ruleForm2.checkPass" auto-complete="off"></el-input>
-        </el-form-item>
-        <el-form-item label="年龄" prop="age">
-          <el-input v-model.number="ruleForm2.age"></el-input>
-        </el-form-item>
-        <el-form-item>
-          <el-button type="primary" @click="submitForm('ruleForm2')">提交</el-button>
-          <el-button @click="resetForm('ruleForm2')">重置</el-button>
-        </el-form-item>
-      </el-form>
+    <div class="newuser">
+      <h2>添加新用户</h2>
+      <input type="text" name="adminName" id="adminName" placeholder="用户名">
+      <input type="password" name="password" id="password" placeholder="新密码">
+      <input type="password" name="againPassword" id="againPassword" placeholder="请再次输入新密码">
+      <input type="button" @click="addAdmin" class="button" value="提交">
     </div>
   </div>
 </template>
 
 <script>
   import $ from 'jquery'
-  import { getCookie } from '../js/cookie'
-  // import { hexSha1 } from '../encryption/sha1'
-  const token = getCookie('token')
+  import { hexSha1 } from '../encryption/sha1'
   let arr = []
   let counter = 0
   export default {
     name: 'info',
     data() {
-      let checkAge = (rule, value, callback) => {
-        if (!value) {
-          return callback(new Error('年龄不能为空'));
-        }
-        setTimeout(() => {
-          if (!Number.isInteger(value)) {
-            callback(new Error('请输入数字值'));
-          } else {
-            if (value < 18) {
-              callback(new Error('必须年满18岁'));
-            } else {
-              callback();
-            }
-          }
-        }, 1000);
-      };
-      let validatePass = (rule, value, callback) => {
-        if (value === '') {
-          callback(new Error('请输入密码'));
-        } else {
-          if (this.ruleForm2.checkPass !== '') {
-            this.$refs.ruleForm2.validateField('checkPass');
-          }
-          callback();
-        }
-      };
-      let validatePass2 = (rule, value, callback) => {
-        if (value === '') {
-          callback(new Error('请再次输入密码'));
-        } else if (value !== this.ruleForm2.pass) {
-          callback(new Error('两次输入密码不一致!'));
-        } else {
-          callback();
-        }
-      };
       return {
-        ruleForm2: {
-          pass: '',
-          checkPass: '',
-          age: ''
-        },
-        rules2: {
-          pass: [
-            { validator: validatePass, trigger: 'blur' }
-          ],
-          checkPass: [
-            { validator: validatePass2, trigger: 'blur' }
-          ],
-          age: [
-            { validator: checkAge, trigger: 'blur' }
-          ]
-        },
         utitle: '管理员信息',
         columns7: [
           {
@@ -139,7 +76,7 @@
                       this.changePw(params.index)
                     }
                   }
-                }, 'success'),
+                }, '更改密码'),
                 h('Button', {
                   props: {
                     type: 'error',
@@ -160,6 +97,67 @@
       }
     },
     methods: {
+      addAdmin () {
+        let that = this;
+        let username = $('#adminName').val();
+        let password = $('#password').val();
+        let newPassword = $('#againPassword').val();
+        let reg = /^[A-Za-z0-9]+$/;
+        let patrn = /^(\w){6,20}$/;
+        if (!reg.exec(username) || username === '') {
+          that.$notify.error({
+            title: '错误',
+            message: '用户名格式错误'
+          });
+        } else {
+          if (!patrn.exec(password) || password === '') {
+            that.$notify.error({
+              title: '错误',
+              message: '密码格式错误'
+            });
+          } else {
+            // console.log(password);
+            // console.log(newPassword);
+            if (password !== newPassword) {
+              that.$notify.error({
+                title: '错误',
+                message: '两次密码不一致'
+              });
+            } else {
+              $.ajax({
+                type: "GET",
+                url: 'http://127.0.0.1:3000/addAdmin',
+                dataType: "json",
+                xhrFields: { withCredentials: true },
+                data: {
+                  username: username,
+                  password: password
+                },
+                success: function (response) {
+                  if (response.Error) {
+                    that.$notify.error({
+                      title: '错误',
+                      message: response.Result
+                    });
+                  } else {
+                    that.$notify({
+                      title: '成功',
+                      message: response.Result,
+                      type: 'success'
+                    })
+                  }
+                },
+                error: function (err) {
+                  that.$notify.error({
+                    title: '错误',
+                    message: '报名失败'
+                  });
+                }
+              });
+            }
+          }
+        }
+      },
       submitForm(formName) {
         this.$refs[formName].validate((valid) => {
           if (valid) {
@@ -190,9 +188,9 @@
             url: 'http://127.0.0.1:3000/adminChange',
             data: {
               username: that.data6[index].username,
-              password: hexSha1(value),
-              token: token
+              password: hexSha1(value)
             },
+            xhrFields: { withCredentials: true },
             dataType: 'json',
             success: function (response) {
               // console.log(response)
@@ -223,29 +221,38 @@
       },
       remove(index) {
         let that = this
-        $.ajax({
-          type: 'GET',
-          url: 'http://127.0.0.1:3000/adminDel',
-          data: {
-            id: that.data6[index].id,
-            token: token
-          },
-          dataType: 'json',
-          success: function (response) {
-            // console.log(response)
-            // console.log(that.data6)
-            if (response.Error) {
-              that.$alert(response.Result, '提示', {
-                confirmButtonText: '确定'
-              })
-            } else {
-              that.$alert('删除成功', '提示', {
-                confirmButtonText: '确定'
-              })
+        this.$confirm('此操作将永久删除该用户, 是否继续?', '提示', {
+          confirmButtonText: '确定',
+          cancelButtonText: '取消',
+          type: 'warning'
+        }).then(() => {
+          $.ajax({
+            type: 'GET',
+            url: 'http://127.0.0.1:3000/adminDel',
+            data: {
+              id: that.data6[index].id
+            },
+            xhrFields: { withCredentials: true },
+            dataType: 'json',
+            success: function (response) {
+              if (response.Error) {
+                that.$alert(response.Result, '提示', {
+                  confirmButtonText: '确定'
+                })
+              } else {
+                that.$alert('删除成功', '提示', {
+                  confirmButtonText: '确定'
+                })
+              }
             }
-          }
-        })
-        this.data6.splice(index, 1)
+          });
+          that.data6.splice(index, 1)
+        }).catch(() => {
+          that.$message({
+            type: 'info',
+            message: '已取消删除'
+          });
+        });
       },
       leftPage() {
         if (counter === 0) {
@@ -286,24 +293,28 @@
         type: 'GET',
         url: 'http://127.0.0.1:3000/adminInfoAll',
         dataType: 'json',
-        data: {
-          token: token
-        },
+        xhrFields: { withCredentials: true },
         success: function (response) {
           // console.log(response)
           // console.log(that.data6)
-          arr[0] = []
-          let j = 0
-          arr[j].push(response.Result[0])
-          for (let i = 1; i < response.Result.length; i++) {
-            if (i % 12 === 0) {
-              j++
-              arr[j] = []
+          if (response.Error) {
+            that.$alert(response.Result, '提示', {
+              confirmButtonText: '确定'
+            })
+          } else {
+            arr[0] = []
+            let j = 0
+            arr[j].push(response.Result[0])
+            for (let i = 1; i < response.Result.length; i++) {
+              if (i % 3 === 0) {
+                j++
+                arr[j] = []
+              }
+              arr[j].push(response.Result[i])
             }
-            arr[j].push(response.Result[i])
+            // console.log(arr)
+            that.data6 = arr[0]
           }
-          // console.log(arr)
-          that.data6 = arr[0]
         }
       })
     }
@@ -332,6 +343,10 @@
     height: 40px;
     /* background-color: rgba(224, 219, 219, 0.842); */
     margin: 40px 0;
+    min-width: 1000px;
+  }
+  .tab {
+    min-width: 1000px;
   }
 
   .button {
@@ -341,5 +356,64 @@
     margin: 50px auto;
     overflow: hidden;
     vertical-align: middle;
+  }
+  .newuser {
+    width: 100%;
+    min-width: 1000px;
+    h2 {
+      text-align: center;
+      font-weight: 600;
+      letter-spacing: 2px;
+      padding-bottom: 20px;
+    }
+    #adminName,
+    #password,
+    #againPassword {
+      margin-top: 20px;
+      width: 100%;
+      height: 40px;
+      border: 0;
+      color: rgb(0, 1, 7);
+      border-radius: 5px;
+      font-size: 16px;
+      font-weight: 500;
+      // background-color: transparent;
+      // background-color: rgba(255, 255, 255, 0.383);
+      border: 1px solid rgba(107, 6, 6, 0.3); /*边框半透明*/
+      box-shadow: inset 0 0 14px rgba(255,255,255,0.2),0 0 14px rgba(255,255,255,0.2);/*内外渐变阴影*/
+      font-size: 1.2em;
+      padding-left: 12px;
+    }
+    .button {
+      width: 100%;
+      height: 43px;
+      border: 0;
+      border-radius: 5px;
+      margin-top: 10px;
+      font-size: 1.25em;
+      font-weight: bold;
+      background-color: #66d0faf5;
+      color: #808080;
+    }
+    .button:hover {
+      color: #f9fafce8;
+      background-color: rgb(53, 160, 248);
+    }
+    .button:active {
+      -webkit-transform: translateY(2px);
+      -moz-transform: translateY(2px);
+    }
+    input:focus {
+      outline: none;
+      // border: 1px solid red;
+      background-color: rgb(156, 220, 245);
+    }
+    input::-webkit-input-placeholder {
+      color: rgba(2, 15, 26, 0.733);
+      font-weight: 400;
+      font-size: 16px;
+      letter-spacing: 2px;
+      text-align: center;
+    }
   }
 </style>

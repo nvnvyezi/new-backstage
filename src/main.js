@@ -22,7 +22,7 @@ router.beforeEach((to, from, next) => {
     if (token === 'e537173980dbc9363cd70f11edc26a6c606d4066') {
       next()
     } else {
-      next('/login')
+      next('/')
     }
   }
 })

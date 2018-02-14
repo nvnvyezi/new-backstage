@@ -13,13 +13,9 @@
 
 <script>
 import $ from 'jquery'
-import login from '../js/login'
 import {setCookie} from '../js/cookie'
-// import { hexSha1 } from '../encryption/sha1'
+import { hexSha1 } from '../encryption/sha1'
 export default {
-  components: {
-    login
-  },
   name: 'HelloWorld',
   data () {
     return {
@@ -34,7 +30,8 @@ export default {
       let reg = /^[A-Za-z0-9]+$/
       let patrn = /^(\w){6,20}$/
       if (reg.exec(message.id) && message.id.length <= 20 && patrn.exec(message.password) && message.password.length <= 20) {
-        // message.password = hexSha1($('#password').val())
+        message.password = hexSha1($('#password').val())
+        // console.log(message.password);
         // console.log(message.password);
         $.ajax({
           type: 'GET',
@@ -43,12 +40,13 @@ export default {
           data: {
             message
           },
+          xhrFields: { withCredentials: true },
           success: function (response) {
             console.log(response)
             if (!response.Err) {
               const path = '/' + response.Path
-              setCookie('token', response.token, 1)
-              setCookie('username', response.name, 1)
+              setCookie('token', response.token)
+              setCookie('username', response.name)
               window.location.href = path
             } else {
               alert(response.Data)

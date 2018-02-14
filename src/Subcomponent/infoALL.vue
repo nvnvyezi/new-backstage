@@ -21,8 +21,8 @@
 
 <script>
 import $ from 'jquery'
-import { getCookie } from '../js/cookie'
-const token = getCookie('token')
+// import { getCookie } from '../js/cookie'
+// const token = getCookie('token')
 let arr = []
 let counter = 0
 export default {
@@ -126,29 +126,38 @@ export default {
     },
     remove (index) {
       let that = this
-      $.ajax({
-        type: 'GET',
-        url: 'http://127.0.0.1:3000/Delete',
-        data: {
-          id: that.data6[index].id,
-          token: token
-        },
-        dataType: 'json',
-        success: function (response) {
-          // console.log(response)
-          // console.log(that.data6)
-          if (response.Error) {
-            that.$alert(response.Result, '提示', {
-              confirmButtonText: '确定'
-            })
-          } else {
-            that.$alert('删除成功', '提示', {
-              confirmButtonText: '确定'
-            })
+      this.$confirm('此操作将永久删除该用户, 是否继续?', '提示', {
+        confirmButtonText: '确定',
+        cancelButtonText: '取消',
+        type: 'warning'
+      }).then(() => {
+        $.ajax({
+          type: 'GET',
+          url: 'http://127.0.0.1:3000/Delete',
+          data: {
+            id: that.data6[index].id
+          },
+          xhrFields: { withCredentials: true },
+          dataType: 'json',
+          success: function (response) {
+            if (response.Error) {
+              that.$alert(response.Result, '提示', {
+                confirmButtonText: '确定'
+              })
+            } else {
+              that.$alert('删除成功', '提示', {
+                confirmButtonText: '确定'
+              })
+            }
           }
-        }
-      })
-      this.data6.splice(index, 1)
+        });
+        that.data6.splice(index, 1)
+      }).catch(() => {
+        that.$message({
+          type: 'info',
+          message: '已取消删除'
+        });
+      });
     },
     leftPage () {
       if (counter === 0) {
@@ -176,13 +185,9 @@ export default {
     $.ajax({
       type: 'GET',
       url: 'http://127.0.0.1:3000/infoAll',
-      data: {
-        token: token
-      },
+      xhrFields: { withCredentials: true },
       dataType: 'json',
       success: function (response) {
-        // console.log(response)
-        // console.log(that.data6)
         if (response.Error) {
           that.$alert(response.Result, '提示', {
             confirmButtonText: '确定'

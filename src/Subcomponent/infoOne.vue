@@ -39,8 +39,6 @@
 
 <script>
 import $ from 'jquery'
-import { getCookie } from '../js/cookie'
-const token = getCookie('token')
 let name = ''
 export default {
   data () {
@@ -49,9 +47,13 @@ export default {
       options: [
         {
           value: '选项1',
+          label: '一面通过'
+        },
+        {
+          value: '选项2',
           label: '二面通过'
         }, {
-          value: '选项2',
+          value: '选项3',
           label: '三面通过'
         }],
       value4: '状态',
@@ -69,11 +71,12 @@ export default {
         type: 'GET',
         url: 'http://127.0.0.1:3000/infoOne',
         data: {
-          id: name,
-          token: token
+          id: name
         },
+        xhrFields: { withCredentials: true },
         dataType: 'json',
         success: function (response) {
+          // console.log(response)
           if (response.Error) {
             that.$alert(response.Result, '提示', {
               confirmButtonText: '确定'
@@ -96,40 +99,41 @@ export default {
       let state = ''
       state = $('#stateForm').val()
       // console.log(state)
-      console.log(name)
-      $.ajax({
-        type: 'GET',
-        url: 'http://127.0.0.1:3000/change',
-        data: {
-          id: name,
-          state: state,
-          token: token
-        },
-        dataType: 'json',
-        success: function (response) {
-          if (response.Error) {
-            that.$alert(response.Result, '提示', {
-              confirmButtonText: '确定',
-              callback: action => {
-                this.$message({
-                  type: 'info',
-                  message: `action: ${action}`
-                })
-              }
-            })
-          } else {
-            that.$alert('更改成功', '提示', {
-              confirmButtonText: '确定',
-              callback: action => {
-                this.$message({
-                  type: 'info',
-                  message: `action: ${action}`
-                })
-              }
-            })
+      this.$confirm('你将更改面试结果, 是否继续?', '提示', {
+        confirmButtonText: '确定',
+        cancelButtonText: '取消',
+        type: 'warning'
+      }).then(() => {
+        $.ajax({
+          type: 'GET',
+          url: 'http://127.0.0.1:3000/change',
+          data: {
+            id: name,
+            state: state,
+          },
+          xhrFields: { withCredentials: true },
+          dataType: 'json',
+          success: function (response) {
+            // console.log(response);
+            if (response.Error) {
+              that.$alert(response.Result, '提示', {
+                confirmButtonText: '确定'
+              })
+            } else {
+              // alert(1)
+              that.$alert('更改成功', '提示', {
+                confirmButtonText: '确定'
+              })
+              that.ajax_form();
+            }
           }
-        }
-      })
+        })
+      }).catch(() => {
+        that.$message({
+          type: 'info',
+          message: '已取消更改'
+        });
+      });
     }
   }
 }
