@@ -77,7 +77,7 @@
             key: 'direction',
             filters: [
               {
-                label: 'web',
+                label: 'Web',
                 value: 'web'
               },
               {
@@ -85,11 +85,11 @@
                 value: 'ios'
               },
               {
-                label: 'android',
+                label: 'Android',
                 value: 'android'
               },
               {
-                label: 'java后台',
+                label: 'Java后台',
                 value: 'java后台'
               }
             ],

@@ -51,12 +51,12 @@
           </router-link>
         </li>
         <li class="has-subnav" id="exit">
-          <router-link to="/">
+          <section @click="exitt">
             <i class="fa fa-exit"></i>
             <span class="nav-text">
               {{ exit }}
             </span>
-          </router-link>
+          </section>
         </li>
       </ul>
     </nav>
@@ -68,6 +68,7 @@
 
 <script>
 import { getCookie } from '../js/cookie'
+import { clearCookie } from "../js/cookie";
 export default {
   name: 'admin',
   data () {
@@ -79,6 +80,33 @@ export default {
       admin: 'admin',
       exit: '退出',
       username: getCookie('username')
+    }
+  },
+  methods: {
+    exitt () {
+      // console.log(333);
+      $.ajax({
+          type: 'GET',
+          // url: 'http://127.0.0.1:3000/nvnvyezi',
+          url: 'http://193.112.4.143:3001/Exit',
+          dataType: 'json',
+          xhrFields: { withCredentials: true },
+          success: function (response) {
+            // console.log(response)
+            if (!response.Err) {
+              // const path = '/' + response.Path
+              alert(22)
+              clearCookie('token')
+              clearCookie('username')
+              window.location.reload();
+            } else {
+              alert(response.Data)
+            }
+          },
+          error: function (err) {
+            console.log(err)
+          }
+        })
     }
   }
 }

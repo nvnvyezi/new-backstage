@@ -133,7 +133,8 @@ export default {
       }).then(() => {
         $.ajax({
           type: 'GET',
-          url: 'http://127.0.0.1:3000/Delete',
+          // url: 'http://127.0.0.1:3000/Delete',
+          url: 'http://193.112.4.143:3001/Delete',
           data: {
             id: that.data6[index].id
           },
@@ -184,7 +185,8 @@ export default {
     let that = this
     $.ajax({
       type: 'GET',
-      url: 'http://127.0.0.1:3000/infoAll',
+      // url: 'http://127.0.0.1:3000/infoAll',
+      url: 'http://193.112.4.143:3001/infoAll',
       xhrFields: { withCredentials: true },
       dataType: 'json',
       success: function (response) {

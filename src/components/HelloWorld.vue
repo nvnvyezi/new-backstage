@@ -27,27 +27,28 @@ export default {
       const message = {}
       message.id = $('#userid').val()
       message.password = $('#password').val()
-      let reg = /^[A-Za-z0-9]+$/
-      let patrn = /^(\w){6,20}$/
+      let reg = /^[A-Za-z0-9]+$/;
+      let patrn = /^(\w){6,20}$/;
       if (reg.exec(message.id) && message.id.length <= 20 && patrn.exec(message.password) && message.password.length <= 20) {
         message.password = hexSha1($('#password').val())
         // console.log(message.password);
         // console.log(message.password);
         $.ajax({
           type: 'GET',
-          url: 'http://127.0.0.1:3000/nvnvyezi',
+          // url: 'http://127.0.0.1:3000/nvnvyezi',
+          url: 'http://193.112.4.143:3001/nvnvyezi',
           dataType: 'json',
           data: {
             message
           },
           xhrFields: { withCredentials: true },
           success: function (response) {
-            console.log(response)
+            // console.log(response)
             if (!response.Err) {
-              const path = '/' + response.Path
-              setCookie('token', response.token)
-              setCookie('username', response.name)
-              window.location.href = path
+              // const path = '/' + response.Path
+              setCookie('token', response.token, 1)
+              setCookie('username', response.name, 1)
+              window.location.reload();
             } else {
               alert(response.Data)
             }
